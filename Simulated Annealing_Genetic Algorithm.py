@@ -231,6 +231,7 @@ def cross(wang,fan,wang2,fan2,pos=1):
     assert len(wang) == len(fan) == len(wang2) == len(fan2)
     return (wang[0:pos] + wang2[pos+1:]),(fan[0:pos]+fan2[pos+1:])
 
-##popSize 初始种群大小 
-##change
-def geneticAlgorithm(popSize=100,changeProp=0.3,top=0.2,generation=100):
+##populationSize 初始种群大小 默认为100个样本
+##changeProp     变化概率 默认为0.3 交叉概率即为 1-0.3=0.7
+
+def geneticAlgorithm(populationSize=100,changeProp=0.3,top=0.2,generation=100):
