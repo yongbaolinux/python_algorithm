@@ -117,8 +117,8 @@ def randomSearch(people):
             bestFan = fan
     return bestWang,bestFan
 
-wang,fan = randomSearch(people)
-printSchedule(people,wang,fan)
+#wang,fan = randomSearch(people)
+#printSchedule(people,wang,fan)
 
 '''爬山搜索'''
 def hillClimb(people):
@@ -126,10 +126,41 @@ def hillClimb(people):
     persons = len(people)   #成员数
     wang = [random.randint(0,9) for i in range(persons)]
     fan = [random.randint(0,9) for i in range(persons)]
-    bestCost = calSchedule(people,wang,fan)
+    cost = calSchedule(people,wang,fan)
     while 1:
         ##获取行程的所有邻近行程
-
+        bestWang = []
+        bestFan = []
+        bestCost = 100000
         for i in range(persons*2):
+            #修改往程 安排
             if i < persons:
-                pass
+                # 在原基础上正负两次波动
+                for k in range(-1,2,2):
+                    wang_ = wang[0:i] + [wang[i]+k] + wang[i+1:]
+                    cost_ = calSchedule(people,wang_,fan)
+                    if(cost_ < bestCost):
+                        bestWang = wang_
+                        bestFan = fan
+                        bestCost = cost_
+            #修改返程 安排
+            else:
+                for k in range(-1,2,2):
+                    fan_ = fan[0:i-persons] + [fan[i-persons]+k] + fan[i-persons+1:]
+                    cost_ = calSchedule(people,wang,fan_)
+                    if (cost_ < bestCost):
+                        bestWang = wang
+                        bestFan = fan_
+                        bestCost = cost_
+        if(bestCost >= cost):
+            return wang,fan
+        else:
+            wang = bestWang
+            fan = bestFan
+            cost = bestCost
+
+wang,fan = hillClimb(people)
+printSchedule(people,wang,fan)
+
+
+'''模拟退火算法'''
