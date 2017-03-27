@@ -202,13 +202,13 @@ def simulatedAnnealing(people,T=10000.0,cool=0.95,step=1):
 
     return wang,fan
 
-wang,fan = simulatedAnnealing(people)
-printSchedule(people,wang,fan)
+#wang,fan = simulatedAnnealing(people)
+#printSchedule(people,wang,fan)
 
 '''遗传算法'''
 ## 变化 step 变化跨度
-def change(wang,fan,step=1):
-    wang_ = wang
+def change(schedule,step=1):
+    '''wang_ = wang
     fan_ = fan
     len_ = len(wang)
     assert len_ == len(fan)
@@ -223,15 +223,54 @@ def change(wang,fan,step=1):
             fan_ = fan[0:i] + [fan[i] + step] + fan[i+1:]
         elif (fan[i] - step) >= 0:
             fan_ = fan[0:i] + [fan[i] - step] + fan[i+1:]
-    return wang_,fan_
+    return wang_,fan_'''
+    i = random.randint(0,len(schedule)-1)
+    if(schedule[i] + step) <= 9:
+        schedule = schedule[0:i] + [schedule[i] + step] + schedule[i + 1:]
+    elif(schedule[i] - step) >= 0:
+        schedule = schedule[0:i] + [schedule[i] - step] + schedule[i + 1:]
+    return schedule
 
 ##交叉 pos 交叉点位置
-def cross(wang,fan,wang2,fan2,pos=1):
-    assert pos>0 and pos<len(wang)-1
+def cross(schedule,schedule_):
+    '''assert pos>0 and pos<len(wang)-1
     assert len(wang) == len(fan) == len(wang2) == len(fan2)
-    return (wang[0:pos] + wang2[pos+1:]),(fan[0:pos]+fan2[pos+1:])
+    return (wang[0:pos] + wang2[pos:]),(fan[0:pos]+fan2[pos:])'''
+    assert len(schedule) == len(schedule_)
+    pos = random.randint(1,len(schedule)-2)
+    return schedule[0:pos] + schedule_[pos:]
+
 
 ##populationSize 初始种群大小 默认为100个样本
 ##changeProp     变化概率 默认为0.3 交叉概率即为 1-0.3=0.7
+##top            优选的部分 默认为0.2 即取前面20%的部分
+##generation     繁殖世代数
+def geneticAlgorithm(people,populationSize=100,changeProp=0.3,top=0.2,generation=100):
+    len_=  len(people)
+    schedule = [[random.randint(0,9) for i in range(len_*2)] for i in range(populationSize)]
 
-def geneticAlgorithm(populationSize=100,changeProp=0.3,top=0.2,generation=100):
+    for i in range(generation):
+        ##评估结果
+        calResult = [(calSchedule(people, schedule[k][0:len_], schedule[k][len_:]), v) for k, v in enumerate(schedule)]
+        ##结果排序
+        calResult.sort()
+        ##print calResult
+        ranked = [v for (s, v) in calResult]
+        ##优选部分
+        eliteNum = int(populationSize*top)
+        schedule = ranked[0:eliteNum]
+
+        while len(schedule) < populationSize:
+            if random.random() <= changeProp:
+                #随机选择一个位置进行变化
+                pos = random.randint(0,eliteNum-1)
+                schedule.append(change(schedule[pos]))
+            else:
+                #随机选择两个个体进行交叉
+                obj1 = schedule[random.randint(0,eliteNum-1)]
+                obj2 = schedule[random.randint(0,eliteNum-1)]
+                schedule.append(cross(obj1,obj2))
+
+    return schedule
+
+print geneticAlgorithm(people)
